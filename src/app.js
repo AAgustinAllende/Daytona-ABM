@@ -15,5 +15,8 @@ app.use(productRoutes)
 app.use(ventaRoutes)
 app.use(estadisticas)
 
+app.get('/', (req, res) => {
+    res.send('API funcionando');
+});
 
 export default app
