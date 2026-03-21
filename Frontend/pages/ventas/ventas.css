@@ -1,0 +1,28 @@
+.main-form{
+    margin-left: 2%;
+}
+.client{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+.select-client{
+    margin-left: 10px;
+}
+#cantidad{
+    width: 6%;
+}
+
+/* DETALLE DE VENTAS */
+.filter{
+    margin-left: 3%;
+}
+#fechaDesde, #fechaHasta{
+    width: 8%;
+    margin-left: 2%;
+}
+.desde-filter, .hasta-filter {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}

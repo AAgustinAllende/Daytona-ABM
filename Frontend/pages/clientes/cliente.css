@@ -1,0 +1,27 @@
+#Nombre, #Apellido, #Email, #Telefono, #Calle{
+    width: 20%;
+}
+#DNI{
+    width: 15%;
+}
+#Numero, #Piso, #Dpto {
+    width: 5%
+}
+#fecha_alta{
+    width: 12%;
+}
+.active-date{
+    
+    display: flex;
+    flex-direction: row;
+    
+    align-items: center;
+    
+}
+.checked{
+    margin-left: 2%;
+    font-size: 20px;
+}
+#buscadorClientes{
+    width: 20%;
+}

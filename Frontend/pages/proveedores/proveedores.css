@@ -1,0 +1,32 @@
+#Razon_social, #CUIT, #Email, #Telefono, #Calle{
+width: 20%;
+}
+#Numero{
+    width: 5%;
+}
+#Piso, #Dpto{
+    width: 3%;
+}
+#fecha_alta{
+    width: 12%
+}
+.form-proveedor{
+    margin-left: 3%;
+}
+.active-date{
+    
+    display: flex;
+    flex-direction: row;
+    
+    align-items: center;
+    
+}
+.checked{
+    margin-left: 2%;
+    font-size: 20px;
+}
+#buscadorProveedor{
+    width: 20%;
+}
+
+

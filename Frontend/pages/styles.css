@@ -1,0 +1,18 @@
+.navbar {
+  background: linear-gradient(90deg, #5fa8d3, #4fc3a1); 
+}
+
+.custom-navbar .navbar-item {
+  color: white;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.custom-navbar .navbar-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+  text-decoration: none;
+}
+a{
+  text-decoration: none;
+}
