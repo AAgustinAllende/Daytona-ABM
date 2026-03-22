@@ -4,11 +4,11 @@ export const getCategorias = async (req, res) => {
     try {
         const pool = await getConnection()
 
-        const result = await pool
-            .request()
-            .query("SELECT id_categoria, nombre FROM Categoria")
+        const result = await pool.query(
+            "SELECT id_categoria, nombre FROM categoria"
+        )
 
-        res.json(result.recordset)
+        res.json(result.rows)
 
     } catch (error) {
         console.error("ERROR EN CATEGORIAS:", error)
