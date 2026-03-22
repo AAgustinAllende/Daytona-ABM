@@ -1,13 +1,17 @@
-import {getConnection} from '../database/connection.js'
+import { getConnection } from '../database/connection.js'
 
 export const getCategorias = async (req, res) => {
+    try {
+        const pool = await getConnection()
 
-    const pool = await getConnection()
+        const result = await pool
+            .request()
+            .query("SELECT id_categoria, nombre FROM Categoria")
 
-    const result = await pool
-        .request()
-        .query("SELECT id_categoria, nombre FROM Categoria")
+        res.json(result.recordset)
 
-    res.json(result.recordset)
-
+    } catch (error) {
+        console.error("ERROR EN CATEGORIAS:", error)
+        res.status(500).json({ message: "Error al obtener categorias" })
+    }
 }
