@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000/proveedores'
+const API_URL = 'https://daytona-abm.onrender.com/proveedores'
 
 let modoEditar = false;
 let idEditando = null;

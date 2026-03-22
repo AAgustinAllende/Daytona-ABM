@@ -1,6 +1,6 @@
-const API_PRODUCTOS = "http://localhost:3000/productos";
-const API_CLIENTES = "http://localhost:3000/clientes";
-const API_VENTAS = "http://localhost:3000/ventas";
+const API_PRODUCTOS = "https://daytona-abm.onrender.com/productos";
+const API_CLIENTES = "https://daytona-abm.onrender.com/clientes";
+const API_VENTAS = "https://daytona-abm.onrender.com/ventas";
 
 let carrito = [];
 

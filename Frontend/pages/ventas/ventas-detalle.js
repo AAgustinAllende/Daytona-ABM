@@ -1,4 +1,4 @@
-const API_VENTAS = "http://localhost:3000/ventas";
+const API_VENTAS = "https://daytona-abm.onrender.com/ventas";
 
 let ventasGlobal = [];
 let detallesGlobal = [];

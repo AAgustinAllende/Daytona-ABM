@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000/clientes';
+const API_URL = 'https://daytona-abm.onrender.com/clientes';
 
 let modoEditar = false;
 let idEditando = null;

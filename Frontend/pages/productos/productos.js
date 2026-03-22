@@ -19,7 +19,7 @@ let codigoEditando = null;
 let productosGlobal = []; //array para el filtro de produtos
 
 async function cargarProveedores(){
-    const response = await fetch("http://localhost:3000/proveedores");
+    const response = await fetch("https://daytona-abm.onrender.com/proveedores");
     const proveedores = await response.json();
 
     const select = document.getElementById("Proveedor");
@@ -34,7 +34,7 @@ async function cargarProveedores(){
 }
 
 async function cargarCategorias() {
-    const response = await fetch("http://localhost:3000/categorias");
+    const response = await fetch("https://daytona-abm.onrender.com/categorias");
     const categorias = await response.json();
 
     const select = document.getElementById("Categoria");
@@ -55,10 +55,10 @@ categoriaSelect.addEventListener('change', () => {
 });
 
 async function listarProductos() {
-    const response = await fetch('http://localhost:3000/productos');
+    const response = await fetch('https://daytona-abm.onrender.com/productos');
     const productos = await response.json();
 
-    productosGlobal = productos; // 🔥 guardamos
+    productosGlobal = productos; 
 
     renderProductos(productos);
 }
@@ -103,7 +103,7 @@ function filtrarProductos() {
 }
 
 async function listarProductosInactivos() {
-    const response = await fetch('http://localhost:3000/productos/inactivos');
+    const response = await fetch('https://daytona-abm.onrender.com/productos/inactivos');
     const productos = await response.json();
 
     const tbody = document.querySelector("tbody");
@@ -157,13 +157,13 @@ async function guardarProducto() {
         let response;
 
         if (!modoEditar) {
-            response = await fetch('http://localhost:3000/productos', {
+            response = await fetch('https://daytona-abm.onrender.com/productos', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(producto)
             });
         } else {
-            response = await fetch(`http://localhost:3000/productos/${codigoEditando}`, {
+            response = await fetch(`https://daytona-abm.onrender.com/productos/${codigoEditando}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(producto)
@@ -190,7 +190,7 @@ async function guardarProducto() {
 }
 
 async function editarProducto(id) {
-    const producto = await fetch(`http://localhost:3000/productos/${id}`).then(r => r.json());
+    const producto = await fetch(`https://daytona-abm.onrender.com/productos/${id}`).then(r => r.json());
 
     document.getElementById("Codigo").value = producto.codigo;
     document.getElementById("Descripcion").value = producto.descripcion;
@@ -206,7 +206,7 @@ async function editarProducto(id) {
 async function eliminarProducto(id) {
     if (!confirm("¿Eliminar producto?")) return;
 
-    const response = await fetch(`http://localhost:3000/productos/${id}`, {
+    const response = await fetch(`https://daytona-abm.onrender.com/productos/${id}`, {
         method: 'DELETE'
     });
 
@@ -219,7 +219,7 @@ async function eliminarProducto(id) {
 }
 
 async function reactivarProducto(id){
-    await fetch(`http://localhost:3000/productos/reactivar/${id}`, {
+    await fetch(`https://daytona-abm.onrender.com/productos/reactivar/${id}`, {
         method:'PUT'
     });
 
