@@ -1,117 +1,155 @@
-import {getConnection} from '../database/connection.js'
-import sql from 'mssql'
+import { getConnection } from '../database/connection.js'
 
-export const getProviders = async (req,res) => {
-
-    const pool = await getConnection()
-    const result = await pool.request().query('SELECT * FROM Proveedor WHERE activo = 1')
-    res.json(result.recordset)
-}
-export const getInactiveProvider = async (req,res) => {
-    const pool = await getConnection()
-    const result = await pool
-    .request()
-    .query('SELECT * FROM Proveedor WHERE activo = 0')
-
-    res.json(result.recordset)
-}
-export const getProvider = async (req,res) => {
-    console.log(req.params.id)
-
-    const pool = await getConnection()
-    const result = await pool
-    .request()
-    .input('id', sql.Int, req.params.id)
-    .query('SELECT * FROM Proveedor WHERE id_proveedor = @id')
-
-    if (result.rowsAffected[0] === 0){
-        return res.status(404).json({message: 'Proveedor no encontrado'})
+export const getProviders = async (req, res) => {
+    try {
+        const pool = await getConnection()
+        const result = await pool.query('SELECT * FROM proveedor WHERE activo = true')
+        res.json(result.rows)
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ message: 'Error al obtener proveedores' })
     }
-    return res.json(result.recordset[0])
 }
 
-export const createProvider = async (req,res) => {
-    console.log(req.body)
-
-    const pool = await getConnection()
-    const result = await pool
-    .request()
-    .input('razon_social', sql.NVarChar, req.body.razon_social)
-    .input('cuit', sql.NVarChar, req.body.cuit)
-    .input('telefono', sql.NVarChar, req.body.telefono)
-    .input('email', sql.NVarChar, req.body.email)
-    .input('provincia', sql.NVarChar, req.body.provincia)
-    .input('localidad', sql.NVarChar, req.body.localidad)
-    .input('calle', sql.NVarChar, req.body.calle)
-    .input('numero', sql.NVarChar, req.body.numero)
-    .query(
-        'INSERT INTO Proveedor (razon_social, cuit, telefono, email, provincia, localidad, calle, numero) VALUES (@razon_social,@cuit,@telefono,@email,@provincia,@localidad,@calle,@numero); SELECT SCOPE_IDENTITY() AS id'
-    )
-    console.log(result)
-    res.json({
-        id:result.recordset[0].id,
-        razon_social:req.body.razon_social,
-        cuit:req.body.cuit,
-        telefono:req.body.telefono,
-        email:req.body.email,
-        provincia:req.body.provincia,
-        localidad:req.body.localidad,
-        calle:req.body.calle,
-        numero:req.body.numero
-    })
-}
-export const updateProvider = async (req,res) => {
-    const {id} = req.params.id;
-
-    const pool=await getConnection()
-    const result = await pool
-    .request()
-    .input('id',sql.Int,req.params.id)
-    .input('razon_social', sql.NVarChar, req.body.razon_social)
-    .input('cuit', sql.NVarChar, req.body.cuit)
-    .input('telefono', sql.NVarChar, req.body.telefono)
-    .input('email', sql.NVarChar, req.body.email)
-    .input('provincia', sql.NVarChar, req.body.provincia)
-    .input('localidad', sql.NVarChar, req.body.localidad)
-    .input('calle', sql.NVarChar, req.body.calle)
-    .input('numero', sql.NVarChar, req.body.numero)
-    .query('UPDATE Proveedor SET razon_social = @razon_social, cuit=@cuit,telefono=@telefono, email=@email, provincia=@provincia, localidad=@localidad, calle=@calle, numero=@numero WHERE id_proveedor=@id')
-    
-    if(result.rowsAffected[0] === 0 ){
-        return res.status(404).json({ message: 'Proveedor no encontrado'})
+export const getInactiveProvider = async (req, res) => {
+    try {
+        const pool = await getConnection()
+        const result = await pool.query('SELECT * FROM proveedor WHERE activo = false')
+        res.json(result.rows)
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ message: 'Error al obtener proveedores inactivos' })
     }
-    res.json({ 
-        id:req.params.id,
-        razon_social:req.body.razon_social,
-        cuit:req.body.cuit,
-        telefono:req.body.telefono,
-        email:req.body.email,
-        provincia:req.body.provincia,
-        localidad:req.body.localidad,
-        calle:req.body.calle,
-        numero:req.body.numero
-    })
 }
-export const deleteProvider = async (req,res) => {
 
-    const pool = await getConnection()
+export const getProvider = async (req, res) => {
+    try {
+        const pool = await getConnection()
 
-    const result = await pool.request()
-    .input('id',sql.Int, req.params.id)
-    .query('UPDATE Proveedor SET activo = 0 WHERE id_proveedor = @id')
+        const result = await pool.query(
+            'SELECT * FROM proveedor WHERE id_proveedor = $1',
+            [req.params.id]
+        )
 
-    if (result.rowsAffected[0] === 0){
-        return res.status(404).json({message: 'Proveedor no encontrado'})
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: 'Proveedor no encontrado' })
+        }
+
+        res.json(result.rows[0])
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ message: 'Error al obtener proveedor' })
     }
-    return res.json({message: 'Proveedor eliminado'})
-
 }
-export const activateProvider = async (req,res) => {
-    const pool = await getConnection()
-    await pool 
-    .request()
-    .input('id', sql.Int, req.params.id)
-    .query('UPDATE Proveedor SET activo = 1 WHERE id_proveedor = @id')
 
-    res.json({message:"Proveedor activado"})
+export const createProvider = async (req, res) => {
+    try {
+        const pool = await getConnection()
+
+        const {
+            razon_social,
+            cuit,
+            telefono,
+            email,
+            provincia,
+            localidad,
+            calle,
+            numero
+        } = req.body
+
+        const result = await pool.query(
+            `INSERT INTO proveedor 
+            (razon_social, cuit, telefono, email, provincia, localidad, calle, numero)
+            VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+            RETURNING *`,
+            [razon_social, cuit, telefono, email, provincia, localidad, calle, numero]
+        )
+
+        res.json(result.rows[0])
+
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ message: 'Error al crear proveedor' })
+    }
+}
+
+export const updateProvider = async (req, res) => {
+    try {
+        const pool = await getConnection()
+        const { id } = req.params
+
+        const {
+            razon_social,
+            cuit,
+            telefono,
+            email,
+            provincia,
+            localidad,
+            calle,
+            numero
+        } = req.body
+
+        const result = await pool.query(
+            `UPDATE proveedor SET 
+                razon_social=$1,
+                cuit=$2,
+                telefono=$3,
+                email=$4,
+                provincia=$5,
+                localidad=$6,
+                calle=$7,
+                numero=$8
+            WHERE id_proveedor=$9
+            RETURNING *`,
+            [razon_social, cuit, telefono, email, provincia, localidad, calle, numero, id]
+        )
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: 'Proveedor no encontrado' })
+        }
+
+        res.json(result.rows[0])
+
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ message: 'Error al actualizar proveedor' })
+    }
+}
+
+export const deleteProvider = async (req, res) => {
+    try {
+        const pool = await getConnection()
+
+        const result = await pool.query(
+            'UPDATE proveedor SET activo = false WHERE id_proveedor = $1 RETURNING *',
+            [req.params.id]
+        )
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: 'Proveedor no encontrado' })
+        }
+
+        res.json({ message: 'Proveedor eliminado' })
+
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ message: 'Error al eliminar proveedor' })
+    }
+}
+
+export const activateProvider = async (req, res) => {
+    try {
+        const pool = await getConnection()
+
+        await pool.query(
+            'UPDATE proveedor SET activo = true WHERE id_proveedor = $1',
+            [req.params.id]
+        )
+
+        res.json({ message: "Proveedor activado" })
+
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ message: 'Error al activar proveedor' })
+    }
 }
