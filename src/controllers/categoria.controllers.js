@@ -11,7 +11,7 @@ export const getCategorias = async (req, res) => {
         res.json(result.rows)
 
     } catch (error) {
-        console.error("ERROR REAL:", error) // 👈 ESTO ES LA CLAVE
+        console.error("ERROR REAL:", error) 
         res.status(500).json({ message: "Error al obtener categorias" })
     }
 }

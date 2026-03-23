@@ -1,139 +1,133 @@
-import { getConnection } from '../database/connection.js'
-import sql from 'mssql'
+import { pool } from '../database/connection.js'
 
 export const getClients = async (req, res) => {
-
-    const pool = await getConnection()
-    const result = await pool.request().query('SELECT * FROM Cliente WHERE activo = 1')
-    res.json(result.recordset)
+    try {
+        const result = await pool.query('SELECT * FROM cliente WHERE activo = true')
+        res.json(result.rows)
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ message: 'Error al obtener clientes' })
+    }
 }
 
 export const getClient = async (req, res) => {
-    console.log(req.params.id)
-
-    const pool = await getConnection()
-    const result = await pool
-        .request()
-        .input('id', sql.Int, req.params.id)
-        .query('SELECT * FROM Cliente WHERE id_cliente = @id')
-
-    if (result.rowsAffected[0] === 0) {
-        return res.status(404).json({ message: 'Cliente no encontrado' })
-    }
-    return res.json(result.recordset[0])
-}
-
-export const getInactiveClients = async (req,res) => {
-    const pool = await getConnection()
-    const result = await pool
-    .request()
-    .query('SELECT * FROM Cliente WHERE activo = 0')
-
-    res.json(result.recordset)
-}
-export const createClient = async (req, res) => {
-    console.log(req.body)
-
-    const pool = await getConnection()
-    const result = await pool
-        .request()
-        .input('nombre', sql.NVarChar, req.body.nombre)
-        .input('apellido', sql.NVarChar, req.body.apellido)
-        .input('dni', sql.NVarChar, req.body.dni)
-        .input('telefono', sql.NVarChar, req.body.telefono)
-        .input('email', sql.NVarChar, req.body.email)
-        .input('provincia', sql.NVarChar, req.body.provincia)
-        .input('localidad', sql.NVarChar, req.body.localidad)
-        .input('calle', sql.NVarChar, req.body.calle)
-        .input('numero', sql.NVarChar, req.body.numero)
-        .input('piso', sql.NVarChar, req.body.piso)
-        .input('departamento', sql.NVarChar, req.body.departamento)
-        .input('fecha_alta', sql.DateTime, req.body.fecha_alta)
-        .input('activo', sql.Bit, 1)
-        .query(
-            'INSERT INTO Cliente (nombre, apellido, dni, telefono, email, provincia, localidad, calle, numero, piso, departamento, fecha_alta, activo) VALUES (@nombre,@apellido,@dni,@telefono,@email,@provincia,@localidad,@calle,@numero, @piso, @departamento, @fecha_alta, @activo); SELECT SCOPE_IDENTITY() AS id'
+    try {
+        const result = await pool.query(
+            'SELECT * FROM cliente WHERE id_cliente = $1',
+            [req.params.id]
         )
-    console.log(result)
-    res.json({
-        id: result.recordset[0].id,
-        nombre: req.body.nombre,
-        apellido: req.body.apellido,
-        dni: req.body.dni,
-        telefono: req.body.telefono,
-        email: req.body.email,
-        provincia: req.body.provincia,
-        localidad: req.body.localidad,
-        calle: req.body.calle,
-        numero: req.body.numero,
-        piso: req.body.piso,
-        departamento: req.body.departamento,
-        fecha_alta: req.body.fecha_alta,
-        activo: req.body.activo
-    })
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: 'Cliente no encontrado' })
+        }
+
+        res.json(result.rows[0])
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ message: 'Error al obtener cliente' })
+    }
 }
+
+
+export const getInactiveClients = async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM cliente WHERE activo = false')
+        res.json(result.rows)
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ message: 'Error al obtener clientes inactivos' })
+    }
+}
+
+export const createClient = async (req, res) => {
+    try {
+        const {
+            nombre, apellido, dni, telefono, email,
+            provincia, localidad, calle, numero,
+            piso, departamento
+        } = req.body
+
+        const result = await pool.query(
+            `INSERT INTO cliente 
+            (nombre, apellido, dni, telefono, email, provincia, localidad, calle, numero, piso, departamento)
+            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+            RETURNING *`,
+            [nombre, apellido, dni, telefono, email, provincia, localidad, calle, numero, piso, departamento]
+        )
+
+        res.json(result.rows[0])
+
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ message: 'Error al crear cliente' })
+    }
+}
+
 export const updateClient = async (req, res) => {
-    const { id } = req.params.id;
+    try {
+        const { id } = req.params
 
-    const pool = await getConnection()
-    const result = await pool
-        .request()
-        .input('id', sql.Int, req.params.id)
-        .input('nombre', sql.NVarChar, req.body.nombre)
-        .input('apellido', sql.NVarChar, req.body.apellido)
-        .input('dni', sql.NVarChar, req.body.dni)
-        .input('telefono', sql.NVarChar, req.body.telefono)
-        .input('email', sql.NVarChar, req.body.email)
-        .input('provincia', sql.NVarChar, req.body.provincia)
-        .input('localidad', sql.NVarChar, req.body.localidad)
-        .input('calle', sql.NVarChar, req.body.calle)
-        .input('numero', sql.NVarChar, req.body.numero)
-        .input('piso', sql.NVarChar, req.body.piso)
-        .input('departamento', sql.NVarChar, req.body.departamento)
-        .input('fecha_alta', sql.DateTime, req.body.fecha_alta)
-        .input('activo', sql.Bit, req.body.activo ?? 1)
-        .query('UPDATE Cliente SET nombre = @nombre, apellido=@apellido, dni=@dni,telefono=@telefono, email=@email, provincia=@provincia, localidad=@localidad, calle=@calle, numero=@numero, piso=@piso, departamento=@departamento, fecha_alta=@fecha_alta, activo=@activo  WHERE id_cliente=@id')
+        const {
+            nombre, apellido, dni, telefono, email,
+            provincia, localidad, calle, numero,
+            piso, departamento, activo
+        } = req.body
 
-    if (result.rowsAffected[0] === 0) {
-        return res.status(404).json({ message: 'Cliente no encontrado' })
+        const result = await pool.query(
+            `UPDATE cliente SET 
+                nombre=$1, apellido=$2, dni=$3, telefono=$4, email=$5,
+                provincia=$6, localidad=$7, calle=$8, numero=$9,
+                piso=$10, departamento=$11, activo=$12
+            WHERE id_cliente=$13
+            RETURNING *`,
+            [nombre, apellido, dni, telefono, email,
+             provincia, localidad, calle, numero,
+             piso, departamento, activo ?? true, id]
+        )
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: 'Cliente no encontrado' })
+        }
+
+        res.json(result.rows[0])
+
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ message: 'Error al actualizar cliente' })
     }
-    res.json({
-        id: req.params.id,
-        nombre: req.body.nombre,
-        apellido: req.body.apellido,
-        dni: req.body.dni,
-        telefono: req.body.telefono,
-        email: req.body.email,
-        provincia: req.body.provincia,
-        localidad: req.body.localidad,
-        calle: req.body.calle,
-        numero: req.body.numero,
-        piso: req.body.piso,
-        departamento: req.body.departamento,
-        fecha_alta: req.body.fecha_alta,
-        activo: req.body.activo
-    })
 }
+
+
 export const deleteClient = async (req, res) => {
+    try {
+        const result = await pool.query(
+            'UPDATE cliente SET activo = false WHERE id_cliente = $1 RETURNING *',
+            [req.params.id]
+        )
 
-    const pool = await getConnection()
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: 'Cliente no encontrado' })
+        }
 
-    const result = await pool.request()
-        .input('id', sql.Int, req.params.id)
-        .query('UPDATE Cliente SET activo = 0 WHERE id_cliente = @id')
+        res.json({ message: 'Cliente eliminado' })
 
-    if (result.rowsAffected[0] === 0) {
-        return res.status(404).json({ message: 'Cliente no encontrado' })
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ message: 'Error al eliminar cliente' })
     }
-    return res.json({ message: 'Cliente eliminado' })
-
 }
 
-export const activateClient = async (req,res) => {
-    const pool = await getConnection()
-    await pool 
-    .request()
-    .input('id', sql.Int, req.params.id)
-    .query('UPDATE Cliente SET activo = 1 WHERE id_cliente = @id')
+export const activateClient = async (req, res) => {
+    try {
+        await pool.query(
+            'UPDATE cliente SET activo = true WHERE id_cliente = $1',
+            [req.params.id]
+        )
 
-    res.json({message:"Cliente activado"})
+        res.json({ message: "Cliente activado" })
+
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ message: 'Error al activar cliente' })
+    }
 }
