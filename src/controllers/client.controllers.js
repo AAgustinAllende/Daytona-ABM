@@ -1,7 +1,8 @@
-import { pool } from '../database/connection.js'
+import { getConnection } from '../database/connection.js'
 
 export const getClients = async (req, res) => {
     try {
+        const pool = await getConnection()
         const result = await pool.query('SELECT * FROM cliente WHERE activo = true')
         res.json(result.rows)
     } catch (error) {
@@ -12,6 +13,8 @@ export const getClients = async (req, res) => {
 
 export const getClient = async (req, res) => {
     try {
+        const pool = await getConnection()
+
         const result = await pool.query(
             'SELECT * FROM cliente WHERE id_cliente = $1',
             [req.params.id]
@@ -28,9 +31,9 @@ export const getClient = async (req, res) => {
     }
 }
 
-
 export const getInactiveClients = async (req, res) => {
     try {
+        const pool = await getConnection()
         const result = await pool.query('SELECT * FROM cliente WHERE activo = false')
         res.json(result.rows)
     } catch (error) {
@@ -41,6 +44,8 @@ export const getInactiveClients = async (req, res) => {
 
 export const createClient = async (req, res) => {
     try {
+        const pool = await getConnection()
+
         const {
             nombre, apellido, dni, telefono, email,
             provincia, localidad, calle, numero,
@@ -65,6 +70,7 @@ export const createClient = async (req, res) => {
 
 export const updateClient = async (req, res) => {
     try {
+        const pool = await getConnection()
         const { id } = req.params
 
         const {
@@ -80,9 +86,11 @@ export const updateClient = async (req, res) => {
                 piso=$10, departamento=$11, activo=$12
             WHERE id_cliente=$13
             RETURNING *`,
-            [nombre, apellido, dni, telefono, email,
-             provincia, localidad, calle, numero,
-             piso, departamento, activo ?? true, id]
+            [
+                nombre, apellido, dni, telefono, email,
+                provincia, localidad, calle, numero,
+                piso, departamento, activo ?? true, id
+            ]
         )
 
         if (result.rows.length === 0) {
@@ -97,9 +105,10 @@ export const updateClient = async (req, res) => {
     }
 }
 
-
 export const deleteClient = async (req, res) => {
     try {
+        const pool = await getConnection()
+
         const result = await pool.query(
             'UPDATE cliente SET activo = false WHERE id_cliente = $1 RETURNING *',
             [req.params.id]
@@ -119,6 +128,8 @@ export const deleteClient = async (req, res) => {
 
 export const activateClient = async (req, res) => {
     try {
+        const pool = await getConnection()
+
         await pool.query(
             'UPDATE cliente SET activo = true WHERE id_cliente = $1',
             [req.params.id]
